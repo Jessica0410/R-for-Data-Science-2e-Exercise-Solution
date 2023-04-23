@@ -1,2 +1,3 @@
-# R-for-Data-Science-2e-Exercise-Solution
-Exercise solution of R for DS 2e
+# R for Data Science 2e Exercise
+This repo is for the exericise of [R for Data Science (2e)](https://r4ds.hadley.nz/) at the end of each chapter.
+If any mistakes/typos, feel free to edit and commit. Your generous help really counts.
