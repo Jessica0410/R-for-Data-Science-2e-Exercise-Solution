@@ -16,7 +16,6 @@ Before we do the exercise, we need to install and load relevant library.
 ```{r load library}
 library(tidyverse)
 library(palmerpenguins)
-library(ggthemes)
 ```
 
 ### Table info
