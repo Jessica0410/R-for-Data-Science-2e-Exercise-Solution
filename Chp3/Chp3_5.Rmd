@@ -1,0 +1,39 @@
+---
+title: "Chp3 Working Basics"
+author: "OUYANG YUCHEN"
+date: "2023-04-24"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 3. Working Basis
+### 3.5 Exercise
+
+1. Why does this code not work?
+
+```{r e1}
+#> Error in eval(expr, envir, enclos): object 'my_varıable' not found
+my_variable <- 10
+my_variable #> var name error: my_varıable
+```
+Look carefully! (This may seem like an exercise in pointlessness, but training your brain to notice even the tiniest difference will pay off when programming.)
+
+2. Tweak each of the following R commands so that they run correctly:
+
+
+```{r e2}
+library("tidyverse")
+
+ggplot() + 
+  geom_point(data = mpg, mapping = aes(x = displ, y = hwy)) +
+  geom_smooth(method = "lm")
+```
+
+3. Press Option + Shift + K / Alt + Shift + K. What happens? How can you get to the same place using the menus?
+
+```{r e3}
+# key board shortcut quick reference
+```
