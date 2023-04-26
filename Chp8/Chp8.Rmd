@@ -1,0 +1,106 @@
+---
+title: "Chp8"
+author: "OUYANG YUCHEN"
+date: "2023-04-26"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Chp8 Data Import
+
+### 8.2.4 Exercise
+
+1.  What function would you use to read a file where fields were separated with "\|"?
+
+    <div>
+
+    read_delim(delim="\|")
+
+    </div>
+
+2.  Apart from file, skip, and comment, what other arguments do read_csv() and read_tsv() have in common?
+
+    <div>
+
+    Check [`?read_delim()`]{style="color:red"}, `col_names`, `col_types`, `id`, `col_select`, `lazy`, `progress`...
+
+    </div>
+
+3.  What are the most important arguments to read_fwf()?
+
+    <div>
+
+    The most important arg is `col_positions`, which tells the function where data columns begin\
+    and end.
+
+    </div>
+
+4.  Sometimes strings in a CSV file contain commas. To prevent them from causing problems, they need to be surrounded by a quoting character, like " or '. By default, read_csv() assumes that the quoting character will be ". To read the following text into a data frame, what argument to read_csv() do you need to specify?
+
+    ```{r 824-4}
+    library(tidyverse)
+    read_csv("x,y\n1,'a,b'",quote="'")
+    ```
+
+5.  Identify what is wrong with each of the following inline CSV files. What happens when you run the code?
+
+    ```{r 824-5-1}
+    # fewer col_names, should be columns
+    read_csv("a,b\n1,2,3\n4,5,6")
+    ```
+    
+    ```{r 824-5-2}
+    # the number of columns and data mismateched
+    read_csv("a,b,c\n1,2\n1,2,3,4")
+    ```
+    
+    ```{r 824-5-3}
+    # quote inconstency
+    read_csv("a,b\n\"1")
+    ```
+    
+    ```{r 824-5-4}
+    # mixed numbers and characters
+    read_csv("a,b\n1,2\na,b")
+    ```
+    
+    ```{r 824-5-5}
+    #non-csv delimiter ";"
+    read_csv("a;b\n1;3")
+    ```
+
+6.  Practice referring to non-syntactic names in the following data frame by:
+    ```{r 824-6}
+    annoying <- tibble(
+    `1` = 1:10,
+    `2` = `1` * 2 + rnorm(length(`1`))
+    )
+    ```
+
+    a.  Extracting the variable called `1`.
+    
+    ```{r 824-6a}
+    annoying$`1`
+    ```
+
+    b.  Plotting a scatter plot of `1` vs.`2`.
+    ```{r 824-6b}
+    ggplot(annoying,aes(x=`1`,y=`2`))+geom_point()
+    ```
+
+    c.  Creating a new column called `3`, which is `2` divided by `1`.
+    ```{r 824-6c}
+    annoying <- annoying %>% mutate(`3` = `2`/`1`)
+    ```
+
+    d.  Renaming the columns to `one`, `two`, and `three`.
+    ```{r 824-6d}
+    annoying <- annoying %>% rename(
+      "one" = `1`,
+      "two" = `2`,
+      "three" = `3`)
+    ```
+
