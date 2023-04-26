@@ -1,0 +1,53 @@
+---
+title: "Chp6"
+author: "OUYANG YUCHEN"
+date: "2023-04-26"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Chp6 data tidying
+
+```{r prequisite}
+library(tidyverse)
+```
+
+### 6.2.1 Exercise
+
+1.  For each of the sample tables, describe what each observation and each column represents.
+
+2.  Sketch out the process you'd use to calculate the `rate` for `table2` and `table3`. You will need to perform four operations:
+
+    a.  Extract the number of TB cases per country per year.
+
+    ```{r e2a}
+    cases_t2 <- filter(table2,type=="cases") %>% rename(cases = count) %>% arrange(country,year)
+    ```
+
+    b.  Extract the matching population per country per year.
+
+    ```{r e2b}
+    population_t2 <- filter(table2,type=="population") %>% rename(population = count) %>%    arrange(country,year)
+    ```
+
+    c.  Divide cases by population, and multiply by 10000.
+
+    ```{r e2c}
+    case_n_population <- tibble(
+      country = cases_t2$country,
+      year = cases_t2$year,
+      popluation=population_t2$population,
+      cases=cases_t2$cases
+    ) %>% 
+      mutate(cdp = (cases_t2$cases/population_t2$population)*1000)
+    ```
+
+    d.  Store back in the appropriate place.
+
+    ```{r e2d}
+    case_n_population <- case_n_population %>% mutate(type = "cases_per_pop") %>% rename(count = cdp) %>% select(country,year,type,count)
+    bind_rows(table2,case_n_population) %>% arrange(country,year,type,count)
+    ```
