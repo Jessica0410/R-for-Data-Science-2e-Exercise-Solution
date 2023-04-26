@@ -5,4 +5,4 @@ If any mistakes/typos, feel free to edit and commit. Your generous help really c
 - 2  [Data Visulization](https://github.com/Jessica0410/R-for-Data-Science-2e-Exercise-Solution/tree/c78f06d73b11965a2296a3291e605f8dda8ca74f/Chp2)
 - 3 [Working Basics](https://github.com/Jessica0410/R-for-Data-Science-2e-Exercise-Solution/tree/main/Chp3)
 - 4 Data Transformation
-- 8 [Data Import]()
+- 8 [Data Import](https://github.com/Jessica0410/R-for-Data-Science-2e-Exercise-Solution/tree/main/Chp8)
