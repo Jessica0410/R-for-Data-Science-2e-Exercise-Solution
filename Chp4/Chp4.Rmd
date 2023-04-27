@@ -1,0 +1,328 @@
+---
+title: "Chp4"
+author: "OUYANG YUCHEN"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Chp4 Data Transformation
+
+```{r prequisite}
+library(tidyverse)
+library(nycflights13)
+```
+
+### 4.2.5 Exercises
+
+1.  In a single pipeline, find all flights that meet each of the following conditions:
+
+    a.  Had an arrival delay of two or more hours
+
+    ```{r 425-1-1}
+    flights|>filter(arr_delay >= 120) 
+    ```
+
+    b.  Flew to Houston (`IAH` or `HOU`)
+
+    ```{r 425-1-2, echo=TRUE}
+    flights|>filter(dest == "IAH"| dest == "HOU")
+    ```
+
+    c.  Were operated by United, American, or Delta
+
+    ```{r 425-1-3, echo=TRUE}
+    flights|>filter(carrier %in% c("UA","AA","DL"))
+    ```
+
+    d.  Departed in summer (July, August, and September)
+
+    ```{r 425-1-4}
+    flights|>filter(month %in% c(7,8,9))
+    ```
+
+    e.  Arrived more than two hours late, but didn't leave late
+
+    ```{r 425-1-5}
+    flights|>filter(arr_delay>=120 & dep_delay<=0)
+    ```
+
+    f.  Were delayed by at least an hour, but made up over 30 minutes in flight
+
+    ```{r 425-1-6}
+    flights|>filter(dep_delay>=60 & dep_delay - arr_delay > 30)
+    ```
+
+2.  Sort `flights` to find the flights with longest departure delays.
+
+    ```{r 425-2-1}
+    arrange(flights,desc(dep_delay))
+    ```
+
+    Find the flights that left earliest in the morning.
+
+    ```{r 425-2-2}
+    arrange(flights,dep_delay)
+    ```
+
+3.  Sort `flights` to find the fastest flights. (Hint: Try including a math calculation inside of your function.)
+
+    ```{r 425-3}
+    arrange(flights, desc(distance/air_time))
+    ```
+
+4.  Was there a flight on every day of 2013?
+
+    ```{r 425-4}
+    # 365 distinct records, so there was a flight on everyday of 2013
+    flights|>filter(year==2013)|>distinct(month,day,.keep_all = TRUE)
+    ```
+
+5.  Which flights traveled the farthest distance? Which traveled the least distance?
+
+    ```{r 425-5}
+    # farthest
+    flights|>arrange(desc(distance))
+    # least
+    flights|>arrange(distance)
+    ```
+
+6.  Does it matter what order you used `filter()` and `arrange()` if you're using both? Why/why not? Think about the results and how much work the functions would have to do.
+
+    ```{r 425-6}
+    flights|>filter(month==5|month==7)|>arrange(distance)
+    flights|>arrange(distance)|>filter(month==5|month==7)
+    ```
+
+    It doesn't matter. Because `arrange()` doesn't affect the filtering result as it only sorts the rows.
+
+### 4.3.5 Exercises
+
+1.  Compare `dep_time`, `sched_dep_time`, and `dep_delay`. How would you expect those three numbers to be related?
+
+    ```{r 435-1}
+    # dep_time - sched_dep_time = dep_delay
+    flights|>select(dep_time,sched_dep_time,dep_delay)
+    ```
+
+2.  Brainstorm as many ways as possible to select `dep_time`, `dep_delay`, `arr_time`, and `arr_delay` from flights.
+
+    ```{r 435-2}
+    flights|>select(dep_time,dep_delay,arr_time,arr_delay)
+    flights|>select('dep_time','dep_delay','arr_time','arr_delay')
+    flights|>select(4,6,7,9)
+    flights|>select(starts_with("dep"),starts_with("arr"))
+
+    ```
+
+3.  What happens if you specify the name of the same variable multiple times in a `select()` call?
+
+    ```{r 435-3}
+    flights|>select(month,year,day,year,year,day)
+    ```
+
+    `select()` will ignore the duplication.
+
+4.  What does the `any_of()` function do? Why might it be helpful in conjunction with this vector?
+
+    ```{r 435-4}
+    variables <- c("year", "month", "day", "dep_delay", "arr_delay")
+    ?any_of
+    flights|>select(any_of(variables))
+    ```
+
+    `any_of()` selects variables contained in a character vector but doesn't check for missing variables. It's especially useful with negative selections, when you would like to make sure a variable is removed.
+
+5.  Does the result of running the following code surprise you? How do the select helpers deal with upper and lower case by default? How can you change that default?
+
+    ```{r 435-5}
+    flights |> select(contains("TIME"))
+    flights |> select(contains("TIME",ignore.case=FALSE))
+    ```
+
+    The default helper functions are insensitive to case. To be case sensitive, set `ignore.case = FALSE`.
+
+6.  Rename `air_time` to `air_time_min` to indicate units of measurement and move it to the beginning of the data frame.
+
+    ```{r 435-6}
+    flights |> rename(air_time_min = air_time) |> relocate(air_time_min,.before = 1)
+    ```
+
+7.  Why doesn't the following work, and what does the error mean?
+
+    ```{r 435-7}
+    flights |> 
+      select(tailnum,arr_delay) |> #must select arr_delay
+      arrange(arr_delay)
+    #> Error in `arrange()`:
+    #> ℹ In argument: `..1 = arr_delay`.
+    #> Caused by error:
+    #> ! object 'arr_delay' not found
+    ```
+
+    Because the arr_delay is not selected. Must `arrange()` before selected.
+
+### 4.5.7 Exercises
+
+1.  Which carrier has the worst average delays? Challenge: can you disentangle the effects of bad airports vs.bad carriers? Why/why not? (Hint: think about `flights |> group_by(carrier, dest) |> summarize(n())`)
+
+    ```{r 457-1-worst avg delay}
+    flights |> 
+      filter(arr_delay>0) |> 
+      group_by(carrier) |>
+      summarize(avg_delay = mean(arr_delay, na.rm = TRUE)) |>
+      arrange((desc(avg_delay)))
+    ```
+
+    ```{r 457-1-airports vs. carrier}
+    flights |> 
+      summarize(n_distinct(carrier),n_distinct(origin),n_distinct(dest))
+    ```
+
+    ::: {#Answer 457-1} There are 16 carriers, from 3 origin airports and to 105 different destinations. For many destination airports, there are only few carriers flying there. Therefore it is difficult to say that the delay is due to the carrier. Maybe because of the departure airports is short of the free landing slot as so many flights but the few airports, or maybe because of the weather. :::
+
+2.  Find the flights that are most delayed upon departure from each destination.
+
+    ```{r 457-2}
+    flights|>
+      filter(arr_delay>0) |>
+      select(dest,arr_delay)|>
+      group_by(dest) |>
+      slice_tail(n=1)
+    ```
+
+3.  How do delays vary over the course of the day. Illustrate your answer with a plot.
+
+    ```{r 457-3-delaytable}
+    delay_over_day <- flights |>
+      filter(dep_delay>0|arr_delay>0)|>
+      group_by(hour)|>
+      summarize(
+        avg_dep_delay = mean(dep_delay,na.rm = TRUE),
+        avg_arr_delay = mean(arr_delay,na.rm = TRUE),
+        sd_dep_delay = sd(dep_delay,na.rm = TRUE),
+        sd_arr_delay = sd(arr_delay,na.rm = TRUE)
+      )
+    delay_over_day
+    ```
+
+    ```{r 457-3-delayplot-avg}
+    ggplot(delay_over_day) + 
+      geom_point(aes(x=hour, y=avg_dep_delay,color='avg_dep_delay',size=sd_dep_delay))+
+      geom_point(aes(x=hour, y=avg_arr_delay,color='avg_arr_delay',size=sd_arr_delay))+
+      labs(title = "Avg delay VS scheduled departure time ",
+           x= "hour", y="average delay")
+    ```
+
+    ```{r 457-3-delayplot}
+    ggplot(flights)+
+      geom_count(aes(x=hour,y=arr_delay, color= arr_delay), na.rm = TRUE)+
+      labs(title = "Delay VS schedual", x="hour",y="delay")
+    ```
+
+4.  What happens if you supply a negative `n` to `slice_min()` and friends?
+
+5.  Explain what `count()` does in terms of the dplyr verbs you just learned. What does the `sort` argument to `count()` do?
+
+6.  Suppose we have the following tiny data frame:
+
+    ```{r 457-6}
+    df <- tibble(
+      x = 1:5,
+      y = c("a", "b", "a", "a", "b"),
+      z = c("K", "K", "L", "L", "K")
+    )
+    # x y z
+    # 1 a K
+    # 2 b K
+    # 3 a L
+    # 4 a L
+    # 5 b K
+    ```
+
+    a.  Write down what you think the output will look like, then check if you were correct, and describe what `group_by()` does.
+
+    ```{r 457-6a}
+        df |> group_by(y)
+        # x y z
+        # 1 a K
+        # 2 b K
+        # 3 a L
+        # 4 a L
+        # 5 b K
+    ```
+
+    b.  Write down what you think the output will look like, then check if you were correct, and describe what `arrange()` does. Also comment on how it's different from the `group_by()` in part (a)?
+
+    ```{r 457-6b}
+        df|>arrange(y)
+        # x y z
+        # 1 a K
+        # 3 a L
+        # 4 a L
+        # 2 b K 
+        # 5 b K
+    ```
+
+    c.  Write down what you think the output will look like, then check if you were correct, and describe what the pipeline does.
+
+    ```{r 457-6c}
+    df |>
+      group_by(y) |>
+      summarize(mean_x = mean(x))
+    # y mean_x
+    # a   2.67
+    # b   3.5
+    ```
+
+    d.  Write down what you think the output will look like, then check if you were correct, and describe what the pipeline does. Then, comment on what the message says.
+
+    ```{r 457-6d}
+    df |>
+      group_by(y, z) |>
+      summarize(mean_x = mean(x))
+    # y z mean_x
+    # a K   1
+    # a L   3.5
+    # b K   3.5
+    ```
+
+    e.  Write down what you think the output will look like, then check if you were
+    correct, and describe what the pipeline does. How is the output different
+    from the one in part (d).
+    
+    ```{r 457-6e}
+    df |>
+      group_by(y, z) |>
+      summarize(mean_x = mean(x), .groups = "drop")
+    # y z mean_x
+    # a K   1
+    # a L   3.5
+    # b K   3.5
+    ```
+
+    f.  Write down what you think the outputs will look like, then check if you were 
+    correct, and describe what each pipeline does. How are the outputs of the two 
+    pipelines different?
+    
+    ```{r 457-6f}
+    df |>
+      group_by(y, z) |>
+      summarize(mean_x = mean(x))
+    # y z mean_x
+    # a K   1
+    # a L   3.5
+    # b K   3.5
+  
+    df |>
+      group_by(y, z) |>
+      mutate(mean_x = mean(x))
+    # x y z mean_x
+    # 1 a K    1
+    # 3 a L    3.5
+    # 4 a L    3.5
+    # 2 b K    3.5
+    # 5 b K    3.5
+    ```
+
